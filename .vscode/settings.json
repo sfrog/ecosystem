@@ -2,6 +2,7 @@
   "cSpell.words": [
     "dashmap",
     "opentelemetry",
+    "sqlx",
     "thiserror"
   ]
 }

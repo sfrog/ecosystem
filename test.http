@@ -1,0 +1,17 @@
+### create short url
+POST http://localhost:4321
+Content-Type: application/json
+
+{
+    "url": "https://www.bing.com"
+}
+
+
+### visit short url
+GET http://127.0.0.1:4321/kvusg6
+
+### visit short url
+GET http://127.0.0.1:4321/y5e7-7
+
+### visit short url
+GET http://127.0.0.1:4321/not-exist
