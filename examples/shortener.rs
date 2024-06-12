@@ -58,7 +58,13 @@ enum ShortenerError {
     GetUrlFailed(#[from] GetUrlFailed),
 }
 
-const LISTEN_ADDR: &str = "127.0.0.1:4321";
+#[derive(Debug, Serialize)]
+struct ErrorResponse {
+    code: u16,
+    message: String,
+}
+
+const LISTEN_ADDR: &str = "0.0.0.0:4321";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -182,15 +188,35 @@ impl ResponseBody {
     }
 }
 
+impl ErrorResponse {
+    fn new(code: u16, message: String) -> Self {
+        Self { code, message }
+    }
+
+    fn create_short_url_failed() -> Self {
+        Self::new(1, "Create short url failed".to_string())
+    }
+
+    fn get_url_failed() -> Self {
+        Self::new(2, "Get url failed".to_string())
+    }
+}
+
 impl IntoResponse for ShortenerError {
     fn into_response(self) -> axum::http::Response<axum::body::Body> {
         warn!("{}", self);
         match self {
             ShortenerError::NotFound(_) => StatusCode::NOT_FOUND.into_response(),
-            ShortenerError::CreateShortUrlFailed(_) => {
-                StatusCode::UNPROCESSABLE_ENTITY.into_response()
-            }
-            Self::GetUrlFailed(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            ShortenerError::CreateShortUrlFailed(_) => (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                Json(ErrorResponse::create_short_url_failed()),
+            )
+                .into_response(),
+            Self::GetUrlFailed(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse::get_url_failed()),
+            )
+                .into_response(),
         }
     }
 }
